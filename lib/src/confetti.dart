@@ -217,9 +217,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget> with SingleTickerProvid
       if (!widget.shouldLoop) {
         _stopEmission();
       }
-      if (widget.confettiController.state != ConfettiControllerState.paused) {
-        _continueAnimation();
-      }
+      _continueAnimation();
     }
   }
 
@@ -416,4 +414,6 @@ class ConfettiController extends ChangeNotifier {
     _state = state;
     notifyListeners();
   }
+
+  ConfettiController copyWith({Duration? duration}) => ConfettiController(duration: duration ?? this.duration);
 }

@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 
 void main() => runApp(const ConfettiSample());
 
@@ -25,29 +26,17 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late ConfettiController _controllerCenter;
-  late ConfettiController _controllerCenterRight;
-  late ConfettiController _controllerCenterLeft;
-  late ConfettiController _controllerTopCenter;
-  late ConfettiController _controllerBottomCenter;
+  late ConfettiController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controllerCenter = ConfettiController(duration: const Duration(seconds: 10));
-    _controllerCenterRight = ConfettiController(duration: const Duration(seconds: 10));
-    _controllerCenterLeft = ConfettiController(duration: const Duration(seconds: 10));
-    _controllerTopCenter = ConfettiController(duration: const Duration(seconds: 10));
-    _controllerBottomCenter = ConfettiController(duration: const Duration(seconds: 10));
+    _controller = ConfettiController(duration: const Duration(seconds: 10));
   }
 
   @override
   void dispose() {
-    _controllerCenter.dispose();
-    _controllerCenterRight.dispose();
-    _controllerCenterLeft.dispose();
-    _controllerTopCenter.dispose();
-    _controllerBottomCenter.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -79,140 +68,116 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Stack(
-        children: <Widget>[
-          //CENTER -- Blast
+        alignment: Alignment.topCenter,
+        children: [
+          InsightConfetti(confettiController: _controller),
           Align(
-            alignment: Alignment.center,
-            child: ConfettiWidget(
-              confettiController: _controllerCenter,
-              blastDirectionality: BlastDirectionality.explosive, // don't specify a direction, blast randomly
-              shouldLoop: true, // start again as soon as the animation is finished
-              colors: const [
-                Colors.green,
-                Colors.blue,
-                Colors.pink,
-                Colors.orange,
-                Colors.purple
-              ], // manually specify the colors to be used
-              createParticlePath: drawStar, // define a custom shape/path.
-            ),
-          ),
-          Align(
-            alignment: Alignment.center,
-            child: TextButton(
-                onPressed: () {
-                  _controllerCenter.play();
-                },
-                child: _display('blast\nstars')),
-          ),
-
-          //CENTER RIGHT -- Emit left
-          Align(
-            alignment: Alignment.centerRight,
-            child: ConfettiWidget(
-              confettiController: _controllerCenterRight,
-              blastDirection: pi, // radial value - LEFT
-              particleDrag: 0.05, // apply drag to the confetti
-              emissionFrequency: 0.05, // how often it should emit
-              numberOfParticles: 20, // number of particles to emit
-              gravity: 0.05, // gravity - or fall speed
-              shouldLoop: false,
-              colors: const [Colors.green, Colors.blue, Colors.pink], // manually specify the colors to be used
-              strokeWidth: 1,
-              strokeColor: Colors.white,
-            ),
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-                onPressed: () {
-                  _controllerCenterRight.play();
-                },
-                child: _display('pump left')),
-          ),
-
-          //CENTER LEFT - Emit right
-          Align(
-            alignment: Alignment.centerLeft,
-            child: ConfettiWidget(
-              confettiController: _controllerCenterLeft,
-              blastDirection: 0, // radial value - RIGHT
-              emissionFrequency: 0.6,
-              minimumSize: const Size(10, 10), // set the minimum potential size for the confetti (width, height)
-              maximumSize: const Size(50, 50), // set the maximum potential size for the confetti (width, height)
-              numberOfParticles: 1,
-              gravity: 0.1,
-            ),
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-                onPressed: () {
-                  _controllerCenterLeft.play();
-                },
-                child: _display('singles')),
-          ),
-
-          //TOP CENTER - shoot down
-          Align(
-            alignment: Alignment.topCenter,
+            alignment: Alignment.bottomCenter,
             child: Column(
               children: [
-                ConfettiWidget(
-                  confettiController: _controllerTopCenter,
-                  blastDirection: pi / 2,
-                  maxBlastForce: 5, // set a lower max blast force
-                  minBlastForce: 2, // set a lower min blast force
-                  emissionFrequency: 0.05,
-                  numberOfParticles: 50, // a lot of particles at once
-                  gravity: 1,
-                ),
-                const SizedBox(height: 50),
                 TextButton(
-                  onPressed: () => _controllerTopCenter.pause(),
-                  child: Text('Pause animation'),
+                  onPressed: () => _controller.play(),
+                  child: Text('Play'),
                 ),
+                const SizedBox(height: 20),
+                TextButton(
+                  onPressed: () => _controller.pause(),
+                  child: Text('Pause'),
+                )
               ],
             ),
-          ),
-          Align(
-            alignment: Alignment.topCenter,
-            child: TextButton(
-                onPressed: () {
-                  _controllerTopCenter.play();
-                },
-                child: _display('goliath')),
-          ),
-          //BOTTOM CENTER
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: ConfettiWidget(
-              confettiController: _controllerBottomCenter,
-              blastDirection: -pi / 2,
-              emissionFrequency: 0.01,
-              numberOfParticles: 20,
-              maxBlastForce: 100,
-              minBlastForce: 80,
-              gravity: 0.3,
-            ),
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: TextButton(
-                onPressed: () {
-                  _controllerBottomCenter.play();
-                },
-                child: _display('hard and infrequent')),
-          ),
+          )
         ],
       ),
     );
   }
+}
 
-  Text _display(String text) {
-    return Text(
-      text,
-      style: const TextStyle(color: Colors.white, fontSize: 20),
+class InsightConfetti extends StatefulWidget {
+  const InsightConfetti({
+    Key? key,
+    required this.confettiController,
+    this.color,
+  }) : super(key: key);
+
+  static ConfettiController defaultConfettiController() {
+    return ConfettiController(duration: const Duration(seconds: 3));
+  }
+
+  final ConfettiController confettiController;
+  final Color? color;
+
+  @override
+  State<InsightConfetti> createState() => _InsightConfettiState();
+}
+
+class _InsightConfettiState extends State<InsightConfetti> {
+  late List<ConfettiController> _controllers;
+
+  @override
+  void initState() {
+    super.initState();
+    _controllers = List.generate(10, (_) => widget.confettiController.copyWith());
+    widget.confettiController.addListener(() {
+      switch (widget.confettiController.state) {
+        case ConfettiControllerState.playing:
+          _controllers.forEach((controller) => controller.play());
+          break;
+        case ConfettiControllerState.paused:
+          _controllers.forEach((controller) => controller.pause());
+          break;
+        case ConfettiControllerState.stopped:
+          _controllers.forEach((controller) => controller.stop());
+          break;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: _controllers
+          .mapIndexed(
+            (index, controller) => Expanded(
+              child: Container(
+                child: _buildConfettiLane(controller: controller),
+              ),
+            ),
+          )
+          .toList(),
     );
+  }
+
+  Widget _buildConfettiLane({required ConfettiController controller}) {
+    final confettiColor = Colors.yellow;
+    return ConfettiWidget(
+      confettiController: controller,
+      blastDirection: pi / 2,
+      particleDrag: 0.01,
+      emissionFrequency: 0.05,
+      numberOfParticles: 3,
+      gravity: 0.01,
+      shouldLoop: false,
+      colors: [
+        confettiColor,
+        confettiColor.withOpacity(0.5),
+        confettiColor.withOpacity(0.8),
+      ],
+      createParticlePath: _createParticlePath,
+    );
+  }
+
+  Path _createParticlePath(Size size) {
+    final width = size.width * 0.6;
+    final height = size.height * 0.4;
+    final pathShape = Path()
+      ..moveTo(0, 0)
+      ..lineTo(-width, 0)
+      ..lineTo(-width, height)
+      ..lineTo(0, height)
+      ..close();
+    return pathShape;
   }
 }
