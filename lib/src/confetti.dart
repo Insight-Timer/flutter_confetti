@@ -36,8 +36,7 @@ class ConfettiWidget extends StatefulWidget {
               minBlastForce > 0 &&
               maxBlastForce > minBlastForce,
         ),
-        assert(gravity >= 0 && gravity <= 1,
-            '`gravity` needs to be between 0 and 1'),
+        assert(gravity >= 0 && gravity <= 1, '`gravity` needs to be between 0 and 1'),
         assert(strokeWidth >= 0, '`strokeWidth needs to be bigger than 0'),
         super(key: key);
 
@@ -139,8 +138,7 @@ class ConfettiWidget extends StatefulWidget {
   _ConfettiWidgetState createState() => _ConfettiWidgetState();
 }
 
-class _ConfettiWidgetState extends State<ConfettiWidget>
-    with SingleTickerProviderStateMixin {
+class _ConfettiWidgetState extends State<ConfettiWidget> with SingleTickerProviderStateMixin {
   final GlobalKey _particleSystemKey = GlobalKey();
 
   late AnimationController _animController;
@@ -179,8 +177,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   }
 
   void _initAnimation() {
-    _animController = AnimationController(
-        vsync: this, duration: widget.confettiController.duration);
+    _animController = AnimationController(vsync: this, duration: widget.confettiController.duration);
     _animation = Tween<double>(begin: 0, end: 1).animate(_animController);
     _animation
       ..addListener(_animationListener)
@@ -193,12 +190,17 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   }
 
   void _handleChange() {
-    if (widget.confettiController.state == ConfettiControllerState.playing) {
-      _startAnimation();
-      _startEmission();
-    } else if (widget.confettiController.state ==
-        ConfettiControllerState.stopped) {
-      _stopEmission();
+    switch (widget.confettiController.state) {
+      case ConfettiControllerState.playing:
+        _startAnimation();
+        _startEmission();
+        break;
+      case ConfettiControllerState.paused:
+        _stopAnimation();
+        break;
+      case ConfettiControllerState.stopped:
+        _stopEmission();
+        break;
     }
   }
 
@@ -267,8 +269,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   }
 
   Offset _getContainerPosition() {
-    final containerRenderBox =
-        _particleSystemKey.currentContext!.findRenderObject() as RenderBox;
+    final containerRenderBox = _particleSystemKey.currentContext!.findRenderObject() as RenderBox;
     return containerRenderBox.localToGlobal(Offset.zero);
   }
 
@@ -403,13 +404,14 @@ class ConfettiController extends ChangeNotifier {
 
   ConfettiControllerState get state => _state;
 
-  void play() {
-    _state = ConfettiControllerState.playing;
-    notifyListeners();
-  }
+  void play() => _updateState(state: ConfettiControllerState.playing);
 
-  void stop() {
-    _state = ConfettiControllerState.stopped;
+  void pause() => _updateState(state: ConfettiControllerState.paused);
+
+  void stop() => _updateState(state: ConfettiControllerState.stopped);
+
+  void _updateState({required ConfettiControllerState state}) {
+    _state = state;
     notifyListeners();
   }
 }

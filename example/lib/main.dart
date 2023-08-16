@@ -34,16 +34,11 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _controllerCenter =
-        ConfettiController(duration: const Duration(seconds: 10));
-    _controllerCenterRight =
-        ConfettiController(duration: const Duration(seconds: 10));
-    _controllerCenterLeft =
-        ConfettiController(duration: const Duration(seconds: 10));
-    _controllerTopCenter =
-        ConfettiController(duration: const Duration(seconds: 10));
-    _controllerBottomCenter =
-        ConfettiController(duration: const Duration(seconds: 10));
+    _controllerCenter = ConfettiController(duration: const Duration(seconds: 10));
+    _controllerCenterRight = ConfettiController(duration: const Duration(seconds: 10));
+    _controllerCenterLeft = ConfettiController(duration: const Duration(seconds: 10));
+    _controllerTopCenter = ConfettiController(duration: const Duration(seconds: 10));
+    _controllerBottomCenter = ConfettiController(duration: const Duration(seconds: 10));
   }
 
   @override
@@ -72,8 +67,7 @@ class _MyAppState extends State<MyApp> {
     path.moveTo(size.width, halfWidth);
 
     for (double step = 0; step < fullAngle; step += degreesPerStep) {
-      path.lineTo(halfWidth + externalRadius * cos(step),
-          halfWidth + externalRadius * sin(step));
+      path.lineTo(halfWidth + externalRadius * cos(step), halfWidth + externalRadius * sin(step));
       path.lineTo(halfWidth + internalRadius * cos(step + halfDegreesPerStep),
           halfWidth + internalRadius * sin(step + halfDegreesPerStep));
     }
@@ -91,10 +85,8 @@ class _MyAppState extends State<MyApp> {
             alignment: Alignment.center,
             child: ConfettiWidget(
               confettiController: _controllerCenter,
-              blastDirectionality: BlastDirectionality
-                  .explosive, // don't specify a direction, blast randomly
-              shouldLoop:
-                  true, // start again as soon as the animation is finished
+              blastDirectionality: BlastDirectionality.explosive, // don't specify a direction, blast randomly
+              shouldLoop: true, // start again as soon as the animation is finished
               colors: const [
                 Colors.green,
                 Colors.blue,
@@ -125,11 +117,7 @@ class _MyAppState extends State<MyApp> {
               numberOfParticles: 20, // number of particles to emit
               gravity: 0.05, // gravity - or fall speed
               shouldLoop: false,
-              colors: const [
-                Colors.green,
-                Colors.blue,
-                Colors.pink
-              ], // manually specify the colors to be used
+              colors: const [Colors.green, Colors.blue, Colors.pink], // manually specify the colors to be used
               strokeWidth: 1,
               strokeColor: Colors.white,
             ),
@@ -150,10 +138,8 @@ class _MyAppState extends State<MyApp> {
               confettiController: _controllerCenterLeft,
               blastDirection: 0, // radial value - RIGHT
               emissionFrequency: 0.6,
-              minimumSize: const Size(10,
-                  10), // set the minimum potential size for the confetti (width, height)
-              maximumSize: const Size(50,
-                  50), // set the maximum potential size for the confetti (width, height)
+              minimumSize: const Size(10, 10), // set the minimum potential size for the confetti (width, height)
+              maximumSize: const Size(50, 50), // set the maximum potential size for the confetti (width, height)
               numberOfParticles: 1,
               gravity: 0.1,
             ),
@@ -170,14 +156,23 @@ class _MyAppState extends State<MyApp> {
           //TOP CENTER - shoot down
           Align(
             alignment: Alignment.topCenter,
-            child: ConfettiWidget(
-              confettiController: _controllerTopCenter,
-              blastDirection: pi / 2,
-              maxBlastForce: 5, // set a lower max blast force
-              minBlastForce: 2, // set a lower min blast force
-              emissionFrequency: 0.05,
-              numberOfParticles: 50, // a lot of particles at once
-              gravity: 1,
+            child: Column(
+              children: [
+                ConfettiWidget(
+                  confettiController: _controllerTopCenter,
+                  blastDirection: pi / 2,
+                  maxBlastForce: 5, // set a lower max blast force
+                  minBlastForce: 2, // set a lower min blast force
+                  emissionFrequency: 0.05,
+                  numberOfParticles: 50, // a lot of particles at once
+                  gravity: 1,
+                ),
+                const SizedBox(height: 50),
+                TextButton(
+                  onPressed: () => _controllerTopCenter.pause(),
+                  child: Text('Pause animation'),
+                ),
+              ],
             ),
           ),
           Align(
